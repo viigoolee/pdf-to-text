@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "build": "wrangler pages build --outdir dist",
-    "deploy": "wrangler deploy"
+    "build": "wrangler pages deploy ./dist --project-name pdf-to-text --dry-run",
+    "deploy": "wrangler pages deploy ./dist --project-name pdf-to-text"
   },
   "dependencies": {
     "pdf-parse": "^1.1.1"
