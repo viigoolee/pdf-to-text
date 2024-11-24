@@ -1,13 +1,12 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
+import * as pdfjsLib from 'pdfjs-dist';
 
-// Import PDF.js as a CDN script
-const PDFJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-const pdfjsLib = {
-  getDocument: async (data: ArrayBuffer) => {
-    // @ts-ignore
-    const { getDocument } = await import(/* @vite-ignore */ PDFJS_CDN);
-    return getDocument(new Uint8Array(data));
-  }
+// Disable worker and set options for Cloudflare Workers environment
+(pdfjsLib as any).GlobalWorkerOptions = {
+  workerSrc: '',
+  disableWorker: true,
+  disableFontFace: true,
+  verbosity: 0
 };
 
 const HTML_TEMPLATE = `
@@ -134,8 +133,17 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
     const pdfData = await pdfResponse.arrayBuffer();
     
     try {
-      // Load the PDF document
-      const pdf = await pdfjsLib.getDocument(pdfData);
+      // Load the PDF document using the bundled PDF.js
+      const loadingTask = (pdfjsLib as any).getDocument({
+        data: new Uint8Array(pdfData),
+        isEvalSupported: false,
+        disableFontFace: true,
+        useSystemFonts: false,
+        cMapUrl: undefined,
+        standardFontDataUrl: undefined
+      });
+      
+      const pdf = await loadingTask.promise;
 
       // Extract text from all pages
       let text = '';
