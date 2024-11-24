@@ -1,220 +1,138 @@
 import pdfParse from 'pdf-parse';
 
-const htmlTemplate = (baseUrl: string) => `
+const HTML_TEMPLATE = `
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>PDF to Text Converter</title>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Text Converter</title>
     <style>
-      :root {
-        --primary-color: #0070f3;
-        --primary-hover: #0051a2;
-        --bg-light: #f6f6f6;
-        --code-bg: #e6e6e6;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-        line-height: 1.6;
-        color: #333;
-      }
-      h1 {
-        text-align: center;
-        color: var(--primary-color);
-        margin-bottom: 2rem;
-      }
-      .container {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 2rem;
-      }
-      .section {
-        background: var(--bg-light);
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin: 1.5rem 0;
-      }
-      .method {
-        border-left: 4px solid var(--primary-color);
-        padding-left: 1rem;
-        margin: 1rem 0;
-      }
-      input[type="url"] {
-        width: 100%;
-        padding: 12px;
-        margin: 8px 0;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-      }
-      input[type="url"]:focus {
-        border-color: var(--primary-color);
-        outline: none;
-      }
-      button {
-        width: 100%;
-        padding: 12px;
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background 0.3s;
-      }
-      button:hover {
-        background: var(--primary-hover);
-      }
-      code {
-        background: var(--code-bg);
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-family: 'Courier New', monospace;
-        word-break: break-all;
-      }
-      .example {
-        background: white;
-        border: 1px solid #ddd;
-        padding: 1rem;
-        border-radius: 6px;
-        margin: 1rem 0;
-      }
-      .tips {
-        list-style-type: none;
-        padding: 0;
-      }
-      .tips li {
-        padding: 8px 0;
-        padding-left: 24px;
-        position: relative;
-      }
-      .tips li:before {
-        content: "💡";
-        position: absolute;
-        left: 0;
-      }
-      .error {
-        color: #d32f2f;
-        background: #ffebee;
-        padding: 8px;
-        border-radius: 4px;
-        margin-top: 8px;
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>PDF to Text Converter</h1>
-      
-      <div class="section">
-        <h2>📝 How to Use</h2>
-        
-        <div class="method">
-          <h3>Method 1: Direct URL</h3>
-          <p>Simply add your PDF URL to our service URL:</p>
-          <div class="example">
-            <code>${baseUrl}https://example.com/sample.pdf</code>
-          </div>
-        </div>
-
-        <div class="method">
-          <h3>Method 2: Use the Form</h3>
-          <p>Paste your PDF URL below and click Convert:</p>
-          <form action="/convert" method="GET" id="convertForm">
-            <input 
-              type="url" 
-              name="url" 
-              placeholder="https://example.com/document.pdf"
-              required
-              pattern=".*\\.pdf$"
-            >
-            <div class="error" id="urlError">URL must end with .pdf</div>
-            <button type="submit">Convert to Text</button>
-          </form>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>ℹ️ Important Tips</h2>
-        <ul class="tips">
-          <li>Make sure your PDF URL ends with <code>.pdf</code></li>
-          <li>The PDF must be publicly accessible</li>
-          <li>Large PDFs may take a few moments to process</li>
-          <li>Text extraction works best with searchable PDFs</li>
-          <li>Scanned documents might not extract properly</li>
-        </ul>
-      </div>
-    </div>
-
-    <script>
-      document.getElementById('convertForm').addEventListener('submit', function(e) {
-        const input = this.querySelector('input[type="url"]');
-        const error = document.getElementById('urlError');
-        
-        if (!input.value.toLowerCase().endsWith('.pdf')) {
-          e.preventDefault();
-          error.style.display = 'block';
-          input.focus();
-        } else {
-          error.style.display = 'none';
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
         }
-      });
-    </script>
-  </body>
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        form {
+            background: #f7f9fc;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .error {
+            color: #e74c3c;
+            background: #fde8e7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF to Text Converter</h1>
+    <form action="/convert" method="POST">
+        <label for="pdfUrl">Enter PDF URL:</label>
+        <input type="url" id="pdfUrl" name="pdfUrl" required placeholder="https://example.com/document.pdf">
+        <button type="submit">Convert to Text</button>
+    </form>
+    <p>
+        <strong>Direct URL Usage:</strong> Add your PDF URL to the path: <code>/https://example.com/document.pdf</code>
+    </p>
+</body>
 </html>
 `;
 
-export default {
-  async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
+async function handleRequest(request: Request): Promise<Response> {
+  const url = new URL(request.url);
+  const path = url.pathname;
 
-    try {
-      // Handle root path - show the form
-      if (path === '/' || path === '') {
-        return new Response(htmlTemplate(url.origin + '/'), {
-          headers: { 'Content-Type': 'text/html' },
-        });
-      }
+  // Serve home page
+  if (path === "/" || path === "") {
+    return new Response(HTML_TEMPLATE, {
+      headers: { "Content-Type": "text/html" },
+    });
+  }
 
-      // Handle form submission
-      if (path === '/convert') {
-        const params = new URLSearchParams(url.search);
-        const pdfUrl = params.get('url');
-        if (!pdfUrl) {
-          return new Response('No URL provided', { status: 400 });
-        }
-        return Response.redirect(url.origin + '/' + encodeURIComponent(pdfUrl));
-      }
-
-      // Handle PDF URL processing
-      const pdfUrl = decodeURIComponent(path.substring(1));
-      if (!pdfUrl.toLowerCase().endsWith('.pdf')) {
-        return new Response('URL must end with .pdf', { status: 400 });
-      }
-
-      // Fetch and process PDF
-      const response = await fetch(pdfUrl);
-      if (!response.ok) {
-        return new Response(`Failed to fetch PDF: ${response.statusText}`, { status: 400 });
-      }
-
-      const buffer = await response.arrayBuffer();
-      const data = await pdfParse(buffer);
-      
-      return new Response(data.text, {
-        headers: { 'Content-Type': 'text/plain' }
-      });
-
-    } catch (error) {
-      return new Response(`Error processing PDF: ${error.message}`, { status: 500 });
+  // Handle form submission
+  if (path === "/convert" && request.method === "POST") {
+    const formData = await request.formData();
+    const pdfUrl = formData.get("pdfUrl");
+    
+    if (!pdfUrl) {
+      return new Response("PDF URL is required", { status: 400 });
     }
-  },
+
+    return await convertPDF(pdfUrl.toString());
+  }
+
+  // Handle direct URL conversion
+  if (path.length > 1) {
+    const pdfUrl = path.slice(1); // Remove leading slash
+    return await convertPDF(pdfUrl);
+  }
+
+  return new Response("Not Found", { status: 404 });
+}
+
+async function convertPDF(pdfUrl: string): Promise<Response> {
+  try {
+    // Validate URL
+    const url = new URL(pdfUrl);
+    if (!url.href.toLowerCase().endsWith('.pdf')) {
+      return new Response('URL must point to a PDF file', { status: 400 });
+    }
+
+    // Fetch PDF
+    const pdfResponse = await fetch(pdfUrl);
+    if (!pdfResponse.ok) {
+      return new Response(`Failed to fetch PDF: ${pdfResponse.statusText}`, { status: 400 });
+    }
+
+    const pdfBuffer = await pdfResponse.arrayBuffer();
+    const data = await pdfParse(new Uint8Array(pdfBuffer));
+    
+    return new Response(data.text, {
+      headers: { 'Content-Type': 'text/plain' }
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return new Response(`Error converting PDF: ${errorMessage}`, { status: 500 });
+  }
+}
+
+export default {
+  fetch: handleRequest,
 };
