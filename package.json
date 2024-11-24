@@ -1,15 +1,18 @@
 {
+  "name": "pdf-to-text",
+  "version": "1.0.0",
+  "description": "PDF to Text converter using Cloudflare Workers",
   "scripts": {
-    "dev": "wrangler dev src/main.ts",
-    "deploy": "wrangler deploy --minify src/main.ts"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run"
   },
   "dependencies": {
-    "hono": "^4.2.3",
-    "pdfjs-dist": "^4.1.392",
-    "unpdf": "^0.10.1"
+    "hono": "^3.11.7",
+    "unpdf": "^0.1.12"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240403.0",
-    "wrangler": "^3.47.0"
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "wrangler": "^3.22.1"
   }
 }
