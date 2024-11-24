@@ -1,5 +1,9 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
+// Configure PDF.js to run without a worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
 <html lang="en">
