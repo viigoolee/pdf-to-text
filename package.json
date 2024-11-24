@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "hono": "^3.11.7",
-    "unpdf": "^0.1.12"
+    "unpdf": "^0.0.15"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",

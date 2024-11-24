@@ -8,6 +8,9 @@ command = "npm run build"
 [site]
 bucket = "./dist"
 
+# Pages specific configuration
+pages_build_output_dir = "dist"
+
 [build.upload]
 format = "modules"
 main = "./src/main.ts"
