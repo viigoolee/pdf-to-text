@@ -1,8 +1,8 @@
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.js';
-import 'pdfjs-dist/legacy/build/pdf.worker.js';
+import { getDocument } from 'pdfjs-dist/build/pdf.mjs';
 
-// Configure PDF.js to run without a worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Configure PDF.js for worker-less operation
+const pdfjsVersion = '3.11.174'; // Match the version in package.json
+const pdfjsLib = { getDocument };
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -128,7 +128,12 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
     const pdfData = await pdfResponse.arrayBuffer();
     
     // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+    const loadingTask = pdfjsLib.getDocument({ 
+      data: pdfData,
+      isEvalSupported: false,
+      disableFontFace: true,
+      useSystemFonts: false
+    });
     const pdf = await loadingTask.promise;
 
     // Extract text from all pages
