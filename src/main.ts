@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { getDocumentProxy, extractText } from "unpdf";
+import pdfParse from 'pdf-parse';
 
 const app = new Hono();
 
@@ -198,15 +198,8 @@ app.get("/*", async (c) => {
     }
 
     const buffer = await response.arrayBuffer();
-    const pdf = await getDocumentProxy(new Uint8Array(buffer));
-    const result = await extractText(pdf, { mergePages: true });
-
-    // Ensure textContent is a string
-    const textContent = Array.isArray(result.text)
-      ? result.text.join(" ")
-      : result.text;
-
-    return c.text(textContent);
+    const data = await pdfParse(buffer);
+    return c.text(data.text);
   } catch (error) {
     return c.text(`Error processing PDF: ${error.message}`, 500);
   }

@@ -7,3 +7,6 @@ command = "npm run build"
 
 [site]
 bucket = "./dist"
+
+# Pages specific configuration
+pages_build_output_dir = "dist"
