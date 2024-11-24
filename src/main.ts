@@ -1,10 +1,9 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 
-// Import PDF.js library
-const pdfjsLib = require('pdfjs-dist/legacy/build/pdf');
+// Import PDF.js as a dynamic import
+const pdfjsLib = await import('pdfjs-dist/build/pdf.js');
 
 // Configure PDF.js for worker-less operation
-const pdfjsVersion = '3.11.174';
 pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 const HTML_TEMPLATE = `
@@ -140,6 +139,7 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
         cMapUrl: undefined,
         standardFontDataUrl: undefined
       });
+
       const pdf = await loadingTask.promise;
 
       // Extract text from all pages
