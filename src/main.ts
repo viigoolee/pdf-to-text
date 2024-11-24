@@ -1,4 +1,4 @@
-import pdfParse from 'pdf-parse';
+import * as pdfjsLib from 'pdfjs-dist';
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -121,10 +121,21 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
       return new Response(`Failed to fetch PDF: ${pdfResponse.statusText}`, { status: 400 });
     }
 
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-    const data = await pdfParse(new Uint8Array(pdfBuffer));
+    const pdfData = await pdfResponse.arrayBuffer();
     
-    return new Response(data.text, {
+    // Load the PDF document
+    const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+    const pdf = await loadingTask.promise;
+
+    // Extract text from all pages
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map((item: any) => item.str).join(' ') + '\n';
+    }
+    
+    return new Response(text, {
       headers: { 'Content-Type': 'text/plain' }
     });
   } catch (error) {
