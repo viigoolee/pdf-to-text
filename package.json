@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "build": "tsc && cp src/index.html dist/",
+    "build": "mkdir -p dist && esbuild src/main.ts --bundle --outfile=dist/_worker.js --format=esm --target=es2020 && cp src/index.html dist/",
     "deploy": "wrangler pages deploy dist --project-name pdf-to-text"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
     "@types/node": "^20.10.1",
+    "esbuild": "^0.19.8",
     "typescript": "^5.3.3",
     "wrangler": "^3.22.1"
   }
