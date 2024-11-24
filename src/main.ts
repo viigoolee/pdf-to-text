@@ -13,19 +13,39 @@ app.get("/", (c) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+          body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
           input[type="url"] { width: 100%; padding: 8px; margin: 8px 0; }
           button { padding: 8px 16px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; }
           button:hover { background: #0051a2; }
+          .demo { background: #f6f6f6; padding: 1rem; border-radius: 4px; margin: 1rem 0; }
+          code { background: #e6e6e6; padding: 2px 4px; border-radius: 3px; }
         </style>
       </head>
       <body>
         <h1>PDF to Text Converter</h1>
-        <p>Enter a PDF URL or add it directly in the path: <code>/pdf-url-here</code></p>
+        
+        <div class="demo">
+          <h3>Usage Examples:</h3>
+          <p>1. Direct URL Method:</p>
+          <code>${c.req.url}https://example.com/document.pdf</code>
+          
+          <p>2. Using the Form Below:</p>
+          <p>Just paste your PDF URL and click Convert</p>
+        </div>
+
         <form action="/convert" method="GET">
           <input type="url" name="url" placeholder="https://example.com/document.pdf" required>
           <button type="submit">Convert</button>
         </form>
+
+        <div class="demo">
+          <h3>Notes:</h3>
+          <ul>
+            <li>The PDF URL must end with <code>.pdf</code></li>
+            <li>The PDF must be publicly accessible</li>
+            <li>Large PDFs may take longer to process</li>
+          </ul>
+        </div>
       </body>
     </html>
   `);
