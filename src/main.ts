@@ -1,8 +1,11 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.js';
 
-// Configure PDF.js for worker-less operation
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Configure PDF.js to use the bundled worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsLib.PDFWorker ? '' : 'pdf.worker.js';
+
+// Disable workers to avoid the need for a worker file
+(pdfjsLib as any).disableWorker = true;
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
