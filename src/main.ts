@@ -1,7 +1,5 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
-
-// Import PDF.js as a dynamic import
-const pdfjsLib = await import('pdfjs-dist/build/pdf.js');
+import * as pdfjsLib from 'pdfjs-dist/build/pdf.js';
 
 // Configure PDF.js for worker-less operation
 pdfjsLib.GlobalWorkerOptions.workerSrc = '';
