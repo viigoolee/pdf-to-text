@@ -1,11 +1,23 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.js';
 
-// Configure PDF.js to use the bundled worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsLib.PDFWorker ? '' : 'pdf.worker.js';
+// Configure PDF.js to use no worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
-// Disable workers to avoid the need for a worker file
-(pdfjsLib as any).disableWorker = true;
+// Create a custom document loader that doesn't use workers
+const getDocument = (data: Uint8Array) => {
+  return pdfjsLib.getDocument({
+    data,
+    isEvalSupported: false,
+    disableFontFace: true,
+    useSystemFonts: false,
+    cMapUrl: undefined,
+    standardFontDataUrl: undefined,
+    useWorkerFetch: false,
+    disableAutoFetch: true,
+    disableStream: true
+  });
+};
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -131,16 +143,8 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
     const pdfData = await pdfResponse.arrayBuffer();
     
     try {
-      // Load the PDF document
-      const loadingTask = pdfjsLib.getDocument({
-        data: new Uint8Array(pdfData),
-        isEvalSupported: false,
-        disableFontFace: true,
-        useSystemFonts: false,
-        cMapUrl: undefined,
-        standardFontDataUrl: undefined
-      });
-
+      // Load the PDF document using our custom loader
+      const loadingTask = getDocument(new Uint8Array(pdfData));
       const pdf = await loadingTask.promise;
 
       // Extract text from all pages
