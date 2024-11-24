@@ -1,10 +1,11 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.js';
+import workerMethods from './pdf.worker';
 
-// Configure PDF.js to use no worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Configure PDF.js to use our custom worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerMethods as any;
 
-// Create a custom document loader that doesn't use workers
+// Create a custom document loader
 const getDocument = (data: Uint8Array) => {
   return pdfjsLib.getDocument({
     data,
