@@ -1,8 +1,14 @@
-import { getDocument } from 'pdfjs-dist/build/pdf.mjs';
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 
-// Configure PDF.js for worker-less operation
-const pdfjsVersion = '3.11.174'; // Match the version in package.json
-const pdfjsLib = { getDocument };
+// Import PDF.js as a CDN script
+const PDFJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const pdfjsLib = {
+  getDocument: async (data: ArrayBuffer) => {
+    // @ts-ignore
+    const { getDocument } = await import(/* @vite-ignore */ PDFJS_CDN);
+    return getDocument(new Uint8Array(data));
+  }
+};
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -127,26 +133,24 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
 
     const pdfData = await pdfResponse.arrayBuffer();
     
-    // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument({ 
-      data: pdfData,
-      isEvalSupported: false,
-      disableFontFace: true,
-      useSystemFonts: false
-    });
-    const pdf = await loadingTask.promise;
+    try {
+      // Load the PDF document
+      const pdf = await pdfjsLib.getDocument(pdfData);
 
-    // Extract text from all pages
-    let text = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      text += content.items.map((item: any) => item.str).join(' ') + '\n';
+      // Extract text from all pages
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map((item: any) => item.str).join(' ') + '\n';
+      }
+      
+      return new Response(text, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+    } catch (pdfError) {
+      return new Response(`Error processing PDF: ${pdfError instanceof Error ? pdfError.message : 'Unknown error'}`, { status: 500 });
     }
-    
-    return new Response(text, {
-      headers: { 'Content-Type': 'text/plain' }
-    });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return new Response(`Error converting PDF: ${errorMessage}`, { status: 500 });
