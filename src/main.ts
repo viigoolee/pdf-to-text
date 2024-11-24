@@ -1,18 +1,11 @@
-import { getDocument } from 'pdfjs-dist/build/pdf.mjs';
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 
-// Configure PDF.js for worker-less operation in Cloudflare Workers
-const pdfjsLib = {
-  getDocument: (data: Uint8Array) => {
-    return getDocument({
-      data,
-      isEvalSupported: false,
-      disableFontFace: true,
-      useSystemFonts: false,
-      cMapUrl: undefined,
-      standardFontDataUrl: undefined
-    });
-  }
-};
+// Import PDF.js library
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf');
+
+// Configure PDF.js for worker-less operation
+const pdfjsVersion = '3.11.174';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -138,8 +131,15 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
     const pdfData = await pdfResponse.arrayBuffer();
     
     try {
-      // Load the PDF document using the ES module build
-      const loadingTask = pdfjsLib.getDocument(new Uint8Array(pdfData));
+      // Load the PDF document
+      const loadingTask = pdfjsLib.getDocument({
+        data: new Uint8Array(pdfData),
+        isEvalSupported: false,
+        disableFontFace: true,
+        useSystemFonts: false,
+        cMapUrl: undefined,
+        standardFontDataUrl: undefined
+      });
       const pdf = await loadingTask.promise;
 
       // Extract text from all pages
