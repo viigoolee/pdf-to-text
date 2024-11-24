@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "build": "mkdir -p dist && esbuild src/main.ts src/pdf.worker.ts --bundle --outfile=dist/_worker.js --format=esm --target=es2022 --external:canvas --external:*.node && cp src/index.html dist/",
+    "build": "mkdir -p dist && esbuild src/main.ts --bundle --outfile=dist/_worker.js --format=esm --target=es2022 --external:canvas --external:*.node --inject:src/pdf.worker.ts && cp src/index.html dist/",
     "deploy": "wrangler pages deploy dist --project-name pdf-to-text"
   },
   "dependencies": {

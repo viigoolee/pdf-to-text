@@ -1,24 +1,17 @@
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.js';
-import workerMethods from './pdf.worker';
 
-// Configure PDF.js to use our custom worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerMethods as any;
-
-// Create a custom document loader
-const getDocument = (data: Uint8Array) => {
-  return pdfjsLib.getDocument({
-    data,
-    isEvalSupported: false,
-    disableFontFace: true,
-    useSystemFonts: false,
-    cMapUrl: undefined,
-    standardFontDataUrl: undefined,
-    useWorkerFetch: false,
-    disableAutoFetch: true,
-    disableStream: true
-  });
+// The worker code will be injected here by esbuild
+declare const workerMethods: {
+  getTextContent(pageData: any): Promise<{ items: any[] }>;
+  getPage(pageIndex: number): Promise<{
+    items: any[];
+    getTextContent(): Promise<{ items: any[] }>;
+  }>;
 };
+
+// Configure PDF.js to use our injected worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerMethods as any;
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -145,7 +138,18 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
     
     try {
       // Load the PDF document using our custom loader
-      const loadingTask = getDocument(new Uint8Array(pdfData));
+      const loadingTask = pdfjsLib.getDocument({
+        data: new Uint8Array(pdfData),
+        isEvalSupported: false,
+        disableFontFace: true,
+        useSystemFonts: false,
+        cMapUrl: undefined,
+        standardFontDataUrl: undefined,
+        useWorkerFetch: false,
+        disableAutoFetch: true,
+        disableStream: true
+      });
+
       const pdf = await loadingTask.promise;
 
       // Extract text from all pages
