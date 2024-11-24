@@ -1,8 +1,11 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import worker from 'pdfjs-dist/build/pdf.worker.min.js';
 
-// Configure PDF.js to run without a worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+if (typeof window === 'undefined') {
+  // We're in a Worker environment
+  GlobalWorkerOptions.workerSrc = worker;
+}
 
 const HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -128,7 +131,7 @@ async function convertPDF(pdfUrl: string): Promise<Response> {
     const pdfData = await pdfResponse.arrayBuffer();
     
     // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+    const loadingTask = getDocument({ data: pdfData });
     const pdf = await loadingTask.promise;
 
     // Extract text from all pages
